@@ -16,5 +16,3 @@ print_bayes_db: print_bayes_db.cpp bayesdb.hpp
 
 clean:
 	rm -f cluebotng create_bayes_db print_bayes_db create_ann
-
-

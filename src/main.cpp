@@ -286,12 +286,12 @@ void addConfigChain(EditProcessChain & procchain, Setting & configchain, Setting
         string chainelname = configchain[i];
         // Check if there's a config block for this chain element
         if(linkcfgs.exists(chainelname)) {
-            Setting & linkcfg = linkcfgs[chainelname];
+            Setting & linkcfg = linkcfgs.lookup(chainelname);
             string modulename = chainelname;
             if(linkcfg.exists("module")) modulename = (const char *)linkcfg["module"];
             addChainLink(procchain, modulename, linkcfg);
         } else if(chaincfgs.exists(chainelname)) {    // Check if it's the name of another chain
-            addConfigChain(procchain, chaincfgs[chainelname], linkcfgs, chaincfgs);
+            addConfigChain(procchain, chaincfgs.lookup(chainelname), linkcfgs, chaincfgs);
         } else {    // Assume it's the name of a module without a configuration block
             Setting & blanksetting = linkcfgs.add(chainelname, Setting::TypeGroup);
             addChainLink(procchain, chainelname, blanksetting);
@@ -345,7 +345,7 @@ int main(int argc, char **argv) {
     Setting & configchains = rootconfig["chains"];
     globcfg_chains = &configchains;
     if(!configchains.exists(chainname)) throw std::runtime_error("No such chain.");
-    Setting & rootchaincfg = configchains[chainname];
+    Setting & rootchaincfg = configchains.lookup(chainname);
 
     addConfigChain(chain, rootchaincfg, rootconfig, configchains);
 
