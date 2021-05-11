@@ -1,35 +1,71 @@
-A running Cluebot-NG install has two main components - the core and the interface to Wikipedia.
+ClueBot NG - Core
+=================
 
-Core
-====
+The core process performs the primary scoring of edits using an artificial neural network.
 
-The core is written in C++ and listens on a TCP socket for communication from the Wikipedia interface.  It can be compiled by typing 'make', but has a number of prerequisites.  For several of these prerequisites, it uses relatively new features, so the version is important.  If you have all of these prerequisites but still get compile errors, try installing the latest version.
+## Protocol
 
-Prerequisites:
+All request and response packets are based on XML and follow a fixed schema; all fields are expected with relevant values.
 
-* Expat 2.0.1, http://expat.sourceforge.net/
-* MathEval 1.1.7, http://www.gnu.org/software/libmatheval/
-* Berkeley DB 4.x C++ Bindings, http://www.oracle.com/technetwork/database/berkeleydb/
-* libiconv 1.13, http://www.gnu.org/software/libiconv/
-* libfann 2.1.0, http://leenissen.dk/fann/
-* libconfig 1.4.5 C++ Bindings, http://www.hyperrealm.com/libconfig/
-* Boost 1.40.0, http://www.boost.org/
+### Example Request
 
-Interface to Wikipedia
-======================
-
-The interface to Wikipedia is written in PHP and requires a PHP interpreter.
-
-
-Deploying to tools
-==================
-
-```bash
-pip install fabric
-
-fab deploy
-
-# Test
-
-fab deploy_production
+```xml
+<?xml version="1.0"?>
+<WPEditSet>
+    <WPEdit>
+        <EditType>change</EditType>
+        <EditID>1022572696</EditID>
+        <comment>/* Political career */</comment>
+        <user>JamesVilla44</user>
+        <user_edit_count>9146</user_edit_count>
+        <user_distinct_pages />
+        <user_warns>1</user_warns>
+        <prev_user>JamesVilla44</prev_user>
+        <user_reg_time>1553976920</user_reg_time>
+        <common>
+            <page_made_time>1620437208</page_made_time>
+            <title>Angelique Foster</title>
+            <namespace>Main:</namespace>
+            <creator>Moondragon21</creator>
+            <num_recent_edits>14</num_recent_edits>
+            <num_recent_reversions>0</num_recent_reversions>
+        </common>
+        <current>
+            <minor>false</minor>
+            <timestamp>1620720638</timestamp>
+            <text>The current contents</text>
+        </current>
+        <previous>
+            <timestamp>1620720514</timestamp>
+            <text>The previous contents</text>
+        </previous>
+    </WPEdit>
+</WPEditSet>
 ```
+
+### Example Response
+
+```xml
+<WPEditSet>
+    <WPEdit>
+        <editid>1022572696</editid>
+        <score>0.149043</score>
+        <think_vandalism>false</think_vandalism>
+    </WPEdit>
+</WPEditSet>
+```
+
+## Runtime Configuration
+
+There are 2 primary artifacts required for the process to execute;
+
+1. Configuration (`conf/`)
+2. Trained data set (`data/`)
+
+Both sets will be compiled as required & included in the generated container/build artifacts.
+
+## Development
+
+To provide a consistent environment, the current build logic is contained within a docker container.
+
+Local complication can be performed via `docker build .`, the CI workflow will also extract the individual binaries for direct consumption.

@@ -1,29 +1,15 @@
-# Compiled stuff
+# Compiled files
 cluebotng
 create_ann
 create_bayes_db
 print_bayes_db
 core
 
-# Config stuff
-bot/cluebot-ng.config.php
-relay_irc.conf.js
-relay_redis.conf.js
-
-# Dynamic stuff
-bot/oftenvandalized.txt
-bot/titles.txt
-data/*.db
-
-# Editor
+# Editor configs
 .idea/
 *.iml
 
-# Temp stuff
-*.py[co]
-bot/vendor
-
-# Stuff on tools
+# Tempoary/runtime files
 *.so*
 titles.txt
 oftenvandalized.txt
