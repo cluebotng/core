@@ -1,0 +1,47 @@
+name: Continuous Integration
+on:
+  push: {branches: [main]}
+  pull_request: {}
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Build docker container
+        run: |
+          docker build -t "cluebotng/core:${GITHUB_SHA::8}" .
+
+      - name: Start docker container
+        run: |
+          docker run -d -p 3565:3565 "cluebotng/core:${GITHUB_SHA::8}" -l -m live_run
+
+      - name: Submit a test edit
+        run: |
+          nc -q 1 127.0.0.1 3565 < .github/data/sample_edit.xml
+
+      - name: Package the binaries
+        run: |
+          mkdir -p release/{bin,data}
+          docker_id=$(docker ps --format '{{.ID}}' -n 1 -l)
+
+          # Binaries
+          for obj in cluebotng create_ann create_bayes_db print_bayes_db;
+          do
+            docker cp ${docker_id}:/opt/cbng-core/${obj} release/bin/${obj}
+          done
+
+          # Databases
+          for obj in bayes.db two_bayes.db;
+          do
+            docker cp ${docker_id}:/opt/cbng-core/data/${obj} release/data/${obj}
+          done
+
+      - name: Stash the artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          retention-days: 7
+          path: "release/**"

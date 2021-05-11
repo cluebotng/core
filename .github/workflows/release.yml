@@ -1,0 +1,52 @@
+name: Release
+on:
+  push: {tags: ['*']}
+permissions:
+  deployments: write
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Build docker container
+        run: |
+          docker build -t "cluebotng/core:${GITHUB_REF##*/}" .
+
+      - name: Start docker container
+        run: |
+          docker run -d -p 3565:3565 "cluebotng/core:${GITHUB_REF##*/}" -l -m live_run
+
+      - name: Submit a test edit
+        run: |
+          nc -q 1 127.0.0.1 3565 < .github/data/sample_edit.xml
+
+      - name: Package the binaries
+        run: |
+          mkdir -p release/{bin,data}
+          docker_id=$(docker ps --format '{{.ID}}' -n 1 -l)
+
+          # Binaries
+          for obj in cluebotng create_ann create_bayes_db print_bayes_db;
+          do
+            docker cp ${docker_id}:/opt/cbng-core/${obj} release/bin/${obj}
+          done
+
+          # Databases
+          for obj in bayes.db two_bayes.db;
+          do
+            docker cp ${docker_id}:/opt/cbng-core/data/${obj} release/data/${obj}
+          done
+
+      - name: Crease a release
+        uses: ncipollo/release-action@v1
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          artifacts: "release/**"
+
+      - name: Publish the docker container
+        run: |
+          docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin <<< "${{ secrets.DOCKER_PASSWORD }}"
+          docker push "cluebotng/core:${GITHUB_REF##*/}"

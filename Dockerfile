@@ -1,45 +1,48 @@
-FROM debian:8
-ADD src/ /usr/src/cbng-core
-ADD data/ /usr/src/cbng-data
+FROM debian:9 AS builder
+# Install system dependencies
+# Note: For libfann, Jessie: 2.1.0, Stretch: 2.2.0
+RUN echo 'deb http://deb.debian.org/debian jessie main' >> /etc/apt/sources.list
 RUN apt-get update
+RUN apt-get install -y build-essential libboost-system-dev libboost-thread-dev \
+                       libexpat1-dev libmatheval-dev libconfig++-dev \
+                       libboost-dev wget libdb5.3++-dev file libfl-dev libc6-dev \
+                       libfann-dev=2.1.0~beta+dfsg-1 libfann2=2.1.0~beta+dfsg-1
 
-# Deps
-RUN apt-get install -y build-essential libboost-system-dev libboost-thread-dev libexpat1-dev libmatheval-dev libfann-dev libconfig++-dev libboost-dev wget libdb5.3++-dev file libfl-dev
+# Build Libiconv
+RUN cd /usr/src && wget https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz && tar -xvf libiconv-1.16.tar.gz
+RUN cd /usr/src/libiconv-1.16 && ./configure --enable-static && make all install
+RUN ldconfig
 
-# Libiconv
-RUN cd /usr/src && wget http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz && tar -xvf libiconv-1.14.tar.gz
-RUN wget -O /usr/src/libiconv-1.14.patch1 https://gist.githubusercontent.com/paulczar/5493708/raw/b8e40037af5c882b3395372093b78c42d6a7c06e/gistfile1.txt
-RUN cd /usr/src/libiconv-1.14 && patch srclib/stdio.in.h < /usr/src/libiconv-1.14.patch1
-RUN cd /usr/src/libiconv-1.14 && ./configure --enable-static && make && make install
-RUN ldconfig -v
+# Build the binaries
+ADD src/ /usr/src/cbng-core
+RUN cd /usr/src/cbng-core && make clean all
 
-# Cluebot build
-RUN cd /usr/src/cbng-core && make clean
-RUN cd /usr/src/cbng-core && make
+# Compile the databases
+# Note: scratch doesn"t have a shell, so we can"t use `RUN` there
+ADD data/ /usr/src/cbng-data
+RUN /usr/src/cbng-core/create_bayes_db /usr/src/cbng-data/bayes.db /usr/src/cbng-data/main_bayes_train.dat
+RUN /usr/src/cbng-core/create_bayes_db /usr/src/cbng-data/two_bayes.db /usr/src/cbng-data/two_bayes_train.dat
 
-# Stash bins
-RUN mkdir -p /opt/cbng/core/bin /opt/cbng/core/etc /opt/cbng/core/var
-RUN cp /usr/src/cbng-core/cluebotng /opt/cbng/core/bin/cluebotng
-RUN cp /usr/src/cbng-core/create_ann /opt/cbng/core/bin/create_ann
-RUN cp /usr/src/cbng-core/create_bayes_db /opt/cbng/core/bin/create_bayes_db
-RUN cp /usr/src/cbng-core/print_bayes_db /opt/cbng/core/bin/print_bayes_db
-RUN chmod 755 /opt/cbng/core/bin/*
+# Build a clean runtime image
+FROM scratch
 
-# Build binary dbs
-RUN /opt/cbng/core/bin/create_bayes_db /opt/cbng/core/var/bayes.db /usr/src/cbng-data/main_bayes_train.dat
-RUN /opt/cbng/core/bin/create_bayes_db /opt/cbng/core/var/two_bayes.db /usr/src/cbng-data/two_bayes_train.dat
-RUN cp /usr/src/cbng-data/main_ann.fann /opt/cbng/core/var/main_ann.fann
+# Copy in the binary files
+COPY --from=builder /usr/src/cbng-core/cluebotng /opt/cbng-core/cluebotng
+COPY --from=builder /usr/src/cbng-core/create_ann /opt/cbng-core/create_ann
+COPY --from=builder /usr/src/cbng-core/create_bayes_db /opt/cbng-core/create_bayes_db
+COPY --from=builder /usr/src/cbng-core/print_bayes_db /opt/cbng-core/print_bayes_db
 
-# Cleanup
-RUN rm -rf /usr/src/*
-RUN apt-get clean
+# Copy in the data files
+COPY --from=builder /usr/src/cbng-data/bayes.db /opt/cbng-core/data/bayes.db
+COPY --from=builder /usr/src/cbng-data/two_bayes.db /opt/cbng-core/data/two_bayes.db
+ADD data/main_ann.fann /opt/cbng-core/data/main_ann.fann
+
+# Config in the config files
+ADD conf/ /opt/cbng-core/conf
 
 # Run time settings
-WORKDIR /opt/cbng/core/
-VOLUME /opt/cbng/core/etc
-
-ENV RUN_MODE=live_run
+WORKDIR /opt/cbng-core
 EXPOSE 3565
 
-# Run!
-CMD /opt/cbng/core/bin/cluebotng -l -c /opt/cbng/core/etc -m $RUN_MODE
+# Runtime
+ENTRYPOINT ["/opt/cbng-core/cluebotng"]

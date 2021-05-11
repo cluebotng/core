@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<WPEditSet>
+    <WPEdit>
+        <EditType>change</EditType>
+        <EditID>1022572696</EditID>
+        <comment>/* Political career */</comment>
+        <user>JamesVilla44</user>
+        <user_edit_count>9146</user_edit_count>
+        <user_distinct_pages />
+        <user_warns>1</user_warns>
+        <prev_user>JamesVilla44</prev_user>
+        <user_reg_time>1553976920</user_reg_time>
+        <common>
+            <page_made_time>1620437208</page_made_time>
+            <title>Angelique Foster</title>
+            <namespace>Main:</namespace>
+            <creator>Moondragon21</creator>
+            <num_recent_edits>14</num_recent_edits>
+            <num_recent_reversions>0</num_recent_reversions>
+        </common>
+        <current>
+            <minor>false</minor>
+            <timestamp>1620720638</timestamp>
+            <text>The current contents</text>
+        </current>
+        <previous>
+            <timestamp>1620720514</timestamp>
+            <text>The previous contents</text>
+        </previous>
+    </WPEdit>
+</WPEditSet>
