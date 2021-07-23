@@ -41,7 +41,7 @@ jobs:
           done
 
           # Config files
-          tar -cvzf release/data/conf.tar.gz conf
+          tar -cvzf release/conf.tar.gz conf
 
       - name: Crease a release
         uses: ncipollo/release-action@v1
