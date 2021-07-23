@@ -41,14 +41,13 @@ jobs:
           done
 
           # Config files
-          docker cp ${docker_id}:/opt/cbng-core/conf conf
           tar -cvzf release/data/conf.tar.gz conf
 
       - name: Crease a release
         uses: ncipollo/release-action@v1
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          artifacts: "release/**"
+          artifacts: "release/data/**,release/bin/**,release/conf.tar.gz"
 
       - name: Publish the docker container
         run: |
