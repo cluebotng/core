@@ -35,10 +35,14 @@ jobs:
           done
 
           # Databases
-          for obj in bayes.db two_bayes.db;
+          for obj in main_ann.fann bayes.db two_bayes.db;
           do
             docker cp ${docker_id}:/opt/cbng-core/data/${obj} release/data/${obj}
           done
+
+          # Config files
+          docker cp ${docker_id}:/opt/cbng-core/conf conf
+          tar -cvzf release/data/conf.tar.gz conf
 
       - name: Stash the artifacts
         uses: actions/upload-artifact@v2
