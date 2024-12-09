@@ -1065,7 +1065,7 @@ public:
                     has_digit_char = true;
                     num_digits++;
                 }
-                if(is_vowel(c)) has_vowel_char++;
+                if(is_vowel(c)) has_vowel_char = true;
                 if(!lfc) {
                     if(c == *(word - 1)) {
                         cur_char_repeat++;
