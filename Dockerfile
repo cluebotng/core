@@ -1,7 +1,7 @@
-FROM debian:9 AS builder
+FROM debian:12 AS builder
 # Install system dependencies
 # Note: For libfann, Jessie: 2.1.0, Stretch: 2.2.0
-RUN echo 'deb http://deb.debian.org/debian jessie main' >> /etc/apt/sources.list
+RUN echo 'deb [trusted=yes] http://archive.debian.org/debian jessie main' >> /etc/apt/sources.list
 RUN apt-get update
 RUN apt-get install -y build-essential libboost-system-dev libboost-thread-dev \
                        libexpat1-dev libmatheval-dev libconfig++-dev \
