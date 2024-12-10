@@ -7,8 +7,8 @@ RUN apt-get install -y build-essential libboost-system-dev libboost-thread-dev \
                        libfann-dev libfann2
 
 # Build Libiconv
-RUN cd /usr/src && wget https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz && tar -xvf libiconv-1.16.tar.gz
-RUN cd /usr/src/libiconv-1.16 && ./configure --enable-static && make all install
+RUN cd /usr/src && wget https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.17.tar.gz && tar -xvf libiconv-1.17.tar.gz
+RUN cd /usr/src/libiconv-1.17 && ./configure --enable-static && make all install
 RUN ldconfig
 
 # Build the binaries
