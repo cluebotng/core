@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<WPEditSet>
+    <WPEdit>
+        <EditType>change</EditType>
+        <EditID>327799203</EditID>
+        <comment>Removed category [[:Category:Government in Christchurch, Dorset|Government in Christchurch, Dorset]];
+            Quick-adding category [[:Category:Politics of Christchurch, Dorset|Politics of Christchurch, Dorset]] (using
+            [[WP:HOTCAT|HotCat]])
+        </comment>
+        <user>BrownHairedGirl</user>
+        <user_edit_count>220769</user_edit_count>
+        <user_distinct_pages>84494</user_distinct_pages>
+        <user_warns>14</user_warns>
+        <prev_user>Keith D</prev_user>
+        <user_reg_time>1136428191</user_reg_time>
+        <common>
+            <page_made_time>1158759694</page_made_time>
+            <title>Christchurch and Lymington (UK Parliament constituency)</title>
+            <namespace>Main</namespace>
+            <creator>BrownHairedGirl</creator>
+            <num_recent_edits>4</num_recent_edits>
+            <num_recent_reversions>0</num_recent_reversions>
+        </common>
+        <current>
+            <minor>true</minor>
+            <timestamp>1259120868</timestamp>
+            <text>
+                {{UK former constituency infobox|
+                | Name = Christchurch and Lymington
+                | Type =
+                | Year = 1974
+                | Abolition = 1983
+                | members = One
+                }}
+
+                '''Christchurch and Lymington''' was a [[United Kingdom constituencies|parliamentary constituency]]
+                centred on the towns of [[Christchurch, Dorset|Christchurch]] and [[Lymington]] in [[Hampshire]]. It
+                returned one [[Member of Parliament]] to the [[British House of Commons|House of Commons]] of the
+                [[Parliament of the United Kingdom]].
+
+                The constituency was created for the [[United Kingdom general election, February 1974|February 1974
+                general election]], and abolished for the [[United Kingdom general election, 1983|1983 general
+                election]], when it was largely replaced by the new [[Christchurch (UK Parliament
+                constituency)|Christchurch]] constituency.
+
+                == Boundaries ==
+                {{Expand-section|date=June 2008}}
+
+                == Members of Parliament ==
+                {| class="wikitable"
+                |-
+                !colspan="2"|Year!!Member!!Party
+                |-
+                |style="background-color: {{Conservative Party (UK)/meta/color}}" |
+                || [[United Kingdom general election, February 1974|Feb 1974]] || [[Robert Adley]] || [[Conservative
+                Party (UK)|Conservative]]
+                |-
+                |colspan="2" align="right"|[[United Kingdom general election, 1983|1983]]
+                |colspan="2"| ''constituency abolished: see [[Christchurch (UK Parliament constituency)|Christchurch]]''
+                |-
+                |}
+
+                == Election results ==
+                {{Expand-section|date=June 2008}}
+
+                == References ==
+                *{{Rayment-hc}}
+
+                [[Category:Parliamentary constituencies in Hampshire (historic)]]
+                [[Category:Parliamentary constituencies in Dorset (historic)]]
+                [[Category:United Kingdom Parliamentary constituencies established in 1974]]
+                [[Category:United Kingdom Parliamentary constituencies disestablished in 1983]]
+                [[Category:Politics of Christchurch, Dorset]]
+
+
+                {{UK-hist-constituency-stub}}
+            </text>
+        </current>
+        <previous>
+            <timestamp>1255953132</timestamp>
+            <text>
+                {{UK former constituency infobox|
+                | Name = Christchurch and Lymington
+                | Type =
+                | Year = 1974
+                | Abolition = 1983
+                | members = One
+                }}
+
+                '''Christchurch and Lymington''' was a [[United Kingdom constituencies|parliamentary constituency]]
+                centred on the towns of [[Christchurch, Dorset|Christchurch]] and [[Lymington]] in [[Hampshire]]. It
+                returned one [[Member of Parliament]] to the [[British House of Commons|House of Commons]] of the
+                [[Parliament of the United Kingdom]].
+
+                The constituency was created for the [[United Kingdom general election, February 1974|February 1974
+                general election]], and abolished for the [[United Kingdom general election, 1983|1983 general
+                election]], when it was largely replaced by the new [[Christchurch (UK Parliament
+                constituency)|Christchurch]] constituency.
+
+                == Boundaries ==
+                {{Expand-section|date=June 2008}}
+
+                == Members of Parliament ==
+                {| class="wikitable"
+                |-
+                !colspan="2"|Year!!Member!!Party
+                |-
+                |style="background-color: {{Conservative Party (UK)/meta/color}}" |
+                || [[United Kingdom general election, February 1974|Feb 1974]] || [[Robert Adley]] || [[Conservative
+                Party (UK)|Conservative]]
+                |-
+                |colspan="2" align="right"|[[United Kingdom general election, 1983|1983]]
+                |colspan="2"| ''constituency abolished: see [[Christchurch (UK Parliament constituency)|Christchurch]]''
+                |-
+                |}
+
+                == Election results ==
+                {{Expand-section|date=June 2008}}
+
+                == References ==
+                *{{Rayment-hc}}
+
+                [[Category:Parliamentary constituencies in Hampshire (historic)]]
+                [[Category:Parliamentary constituencies in Dorset (historic)]]
+                [[Category:United Kingdom Parliamentary constituencies established in 1974]]
+                [[Category:United Kingdom Parliamentary constituencies disestablished in 1983]]
+                [[Category:Government in Christchurch, Dorset]]
+
+
+                {{UK-hist-constituency-stub}}
+            </text>
+        </previous>
+    </WPEdit>
+</WPEditSet>

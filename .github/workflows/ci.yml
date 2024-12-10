@@ -23,6 +23,18 @@ jobs:
         run: |
           nc -q 1 127.0.0.1 3565 < .github/data/sample_edit.xml
 
+      - name: Verify a vandalised edit
+        run: |
+          result=$(nc -q 1 127.0.0.1 3565 < .github/data/bad_edit.xml)
+          echo "${result}"
+          echo "${result}" | grep '<think_vandalism>true</think_vandalism>'
+
+      - name: Verify a clean edit
+        run: |
+          result=$(nc -q 1 127.0.0.1 3565 < .github/data/good_edit.xml)
+          echo "${result}"
+          echo "${result}" | grep '<think_vandalism>false</think_vandalism>'
+
       - name: Package the binaries
         run: |
           mkdir -p release/{bin,data}
