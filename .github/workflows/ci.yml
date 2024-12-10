@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Build docker container
         run: |
@@ -44,7 +44,7 @@ jobs:
           tar -cvzf release/conf.tar.gz conf
 
       - name: Stash the artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           retention-days: 7
           path: "release/**"
