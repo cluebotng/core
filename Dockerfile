@@ -1,4 +1,4 @@
-FROM debian:12 AS builder
+FROM debian:13 AS builder
 # Install system dependencies
 RUN apt-get update
 RUN apt-get install -y build-essential libboost-system-dev libboost-thread-dev \
