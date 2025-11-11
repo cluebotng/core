@@ -1,55 +1,40 @@
 name: Release
-on:
-  push: {tags: ['*']}
+on: { push: { tags: [ 'v*' ] } }
 permissions:
   deployments: write
   contents: write
 jobs:
-  release:
+  create-release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v5
-
-      - name: Build docker container
-        run: |
-          docker build -t "cluebotng/core:${GITHUB_REF##*/}" .
-
-      - name: Start docker container
-        run: |
-          docker run -d -p 3565:3565 "cluebotng/core:${GITHUB_REF##*/}" -l -m live_run
-
-      - name: Submit a test edit
-        run: |
-          nc -q 1 127.0.0.1 3565 < .github/data/sample_edit.xml
-
-      - name: Package the binaries
-        run: |
-          mkdir -p release/{bin,data}
-          docker_id=$(docker ps --format '{{.ID}}' -n 1 -l)
-
-          # Binaries
-          for obj in cluebotng create_ann create_bayes_db print_bayes_db;
-          do
-            docker cp ${docker_id}:/opt/cbng-core/${obj} release/bin/${obj}
-          done
-
-          # Databases
-          for obj in main_ann.fann bayes.db two_bayes.db;
-          do
-            docker cp ${docker_id}:/opt/cbng-core/data/${obj} release/data/${obj}
-          done
-
-          # Config files
-          tar -cvzf release/conf.tar.gz conf
-
-      - name: Crease a release
-        uses: ncipollo/release-action@v1
+      - name: Create GitHub release
+        uses: actions/github-script@v8
         with:
-          token: "${{ secrets.GITHUB_TOKEN }}"
-          artifacts: "release/data/**,release/bin/**,release/conf.tar.gz"
+          script: |
+            const tag_name = context.ref.replace(/^refs\/tags\//, '');
 
-      - name: Publish the docker container
-        run: |
-          docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin <<< "${{ secrets.DOCKER_PASSWORD }}"
-          docker push "cluebotng/core:${GITHUB_REF##*/}"
+            try {
+              const release = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: tag_name
+              });
+
+              console.log(`Release already exists for tag: ${release.data.name}`);
+              return
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error;
+              }
+            }
+
+            const release = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: `Release ${tag_name}`,
+              tag_name: tag_name,
+              draft: false,
+              prerelease: false,
+              generate_release_notes: true,
+            });
+            console.log(`Created release for tag: ${release.data.name}`);
