@@ -1,0 +1,12 @@
+name: Deploy
+on: { release: { types: [ released ] } }
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cluebotng/ci-execute-fabric@main
+        with:
+          task: deploy-reviewer
+          release: ${{ github.ref }}
+          ssh_key: ${{ secrets.CI_SSH_KEY }}
