@@ -7,34 +7,89 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout source
+        uses: actions/checkout@v5
+
+      - name: Build docker container
+        run: |
+          docker build -t "cluebotng/core:${GITHUB_REF##*/}" .
+
+      - name: Start docker container
+        run: |
+          docker run -d -p 3565:3565 "cluebotng/core:${GITHUB_REF##*/}" -l -m live_run
+
+      - name: Submit a test edit
+        run: |
+          nc -q 1 127.0.0.1 3565 < .github/data/sample_edit.xml
+
+      - name: Package the binaries
+        run: |
+          mkdir -p release/{bin,data}
+          docker_id=$(docker ps --format '{{.ID}}' -n 1 -l)
+
+          # Binaries
+          for obj in cluebotng create_ann create_bayes_db print_bayes_db;
+          do
+            docker cp ${docker_id}:/opt/cbng-core/${obj} release/${obj}
+          done
+
+          # Databases
+          for obj in main_ann.fann bayes.db two_bayes.db;
+          do
+            docker cp ${docker_id}:/opt/cbng-core/data/${obj} release/${obj}
+          done
+
+          # Config files
+          tar -cvzf release/conf.tar.gz conf
+
       - name: Create GitHub release
         uses: actions/github-script@v8
         with:
           script: |
             const tag_name = context.ref.replace(/^refs\/tags\//, '');
 
+            let release = null;
             try {
-              const release = await github.rest.repos.getReleaseByTag({
+              release = await github.rest.repos.getReleaseByTag({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 tag: tag_name
               });
 
-              console.log(`Release already exists for tag: ${release.data.name}`);
-              return
+              console.log(`Release already exists for tag: ${release.data.name} (${release.data.id})`);
+              need_to_create_release = false;
             } catch (error) {
               if (error.status !== 404) {
                 throw error;
               }
             }
 
-            const release = await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: `Release ${tag_name}`,
-              tag_name: tag_name,
-              draft: false,
-              prerelease: false,
-              generate_release_notes: true,
-            });
-            console.log(`Created release for tag: ${release.data.name}`);
+            if (!release) {
+              release = await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: `Release ${tag_name}`,
+                tag_name: tag_name,
+                draft: false,
+                prerelease: false,
+                generate_release_notes: true,
+              });
+              console.log(`Created release for tag: ${release.data.name} (${release.data.id})`);
+            }
+
+            const fs = require('fs');
+            const path = require('path');
+
+            for (const file of fs.readdirSync("release/")) {
+              const filePath = path.join("release/", file);
+              if (fs.statSync(filePath).isFile()) {
+                const response = await github.rest.repos.uploadReleaseAsset({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  release_id: release.data.id,
+                  name: file,
+                  data: fs.readFileSync(filePath),
+                });
+                console.log(`Uploaded ${file}: ${response.data.browser_download_url}`);
+              }
+            }
