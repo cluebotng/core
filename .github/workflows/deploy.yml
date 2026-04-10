@@ -1,0 +1,11 @@
+name: Deploy Tagged Release
+on:
+  release:
+    types:
+      - released
+  workflow_call:
+    inputs:
+      ref:
+        required: false
+        type: string
+
