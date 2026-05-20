@@ -1,4 +1,4 @@
-FROM debian:trixie-20260505 AS builder
+FROM debian:trixie-20260518 AS builder
 # Install system dependencies
 RUN apt-get update
 RUN apt-get install -y build-essential libboost-system-dev libboost-thread-dev \
