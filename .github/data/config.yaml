@@ -1,0 +1,14 @@
+mysql:
+  default:
+    schema: cbng_reviewer
+    host: 127.0.0.1
+    user: root
+
+  replica:
+    schema: enwiki_p
+    host: 127.0.0.1
+    user: root
+
+cbng:
+  enable_user_messaging: false
+  enable_irc_messaging: false
