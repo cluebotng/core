@@ -11,10 +11,10 @@ jobs:
       packages: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Build container
-        uses: infrabits/ci-pack@main
+        uses: infrabits/ci-pack@e6fda6bd38b30aed25d3203d7559b756d75d884c # main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           image: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
@@ -27,7 +27,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Extract artifacts
         run: |
@@ -53,7 +53,7 @@ jobs:
           tar -czf release/conf.tar.gz conf
 
       - name: Create GitHub release
-        uses: infrabits/ci-create-missing-release@main
+        uses: infrabits/ci-create-missing-release@d269a3c6b440e23e2a3b43fd60eb1a5bec5a1e60 # main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
