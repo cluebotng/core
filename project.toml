@@ -1,0 +1,17 @@
+[_]
+schema-version = "0.2"
+
+[com.heroku.buildpacks.deb-packages]
+install = [
+  { name = "build-essential", force = true },
+  { name = "libboost-system-dev", force = true },
+  { name = "libboost-thread-dev", force = true },
+  { name = "libexpat1-dev", force = true },
+  { name = "libmatheval-dev", force = true },
+  { name = "libconfig++-dev", force = true },
+  { name = "libboost-dev", force = true },
+  { name = "libboost-regex-dev", force = true },
+  { name = "libdb5.3++-dev", force = true },
+  { name = "libfl-dev", force = true },
+  { name = "libfann-dev", force = true },
+]
