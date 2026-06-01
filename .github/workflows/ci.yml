@@ -1,62 +1,83 @@
-name: Continuous Integration
-on:
-  push: {branches: [main]}
-  pull_request: {}
-permissions:
-  contents: read
+name: CI
+on: { pull_request: { } }
+concurrency:
+  group: ${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 jobs:
-  build:
+  build-container:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      packages: write
+      pull-requests: write
     steps:
-      - name: Checkout source
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@v6
 
-      - name: Build docker container
-        run: |
-          docker build -t "cluebotng/core:${GITHUB_SHA::8}" .
+      - name: Build container
+        uses: infrabits/ci-pack@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          image: ghcr.io/${{ github.repository }}:${{ github.sha }}
+          use_builder: latest
+          buildpack: https://github.com/InfraBits/cmake-buildpack/releases/download/v1.0.1/buildpack.tar.gz
 
-      - name: Start docker container
-        run: |
-          docker run -d -p 3565:3565 "cluebotng/core:${GITHUB_SHA::8}" -l -m live_run
+  test-container:
+    runs-on: ubuntu-latest
+    needs: [build-container]
+    steps:
+      - uses: actions/checkout@v6
 
-      - name: Submit a test edit
+      - name: Start container
         run: |
-          nc -q 1 127.0.0.1 3565 < .github/data/sample_edit.xml
+          docker pull ghcr.io/${{ github.repository }}:${{ github.sha }}
+          docker run -d -p 3565:3565 ghcr.io/${{ github.repository }}:${{ github.sha }}
+          timeout 30 bash -c 'until nc -w 1 127.0.0.1 3565 2>/dev/null | grep -q "<WPEditSet>"; do sleep 1; done'
 
       - name: Verify a vandalised edit
         run: |
-          result=$(nc -q 1 127.0.0.1 3565 < .github/data/bad_edit.xml)
+          result=$(nc -q 10 127.0.0.1 3565 < .github/data/bad_edit.xml)
           echo "${result}"
           echo "${result}" | grep -q '<think_vandalism>true</think_vandalism>'
 
       - name: Verify a clean edit
         run: |
-          result=$(nc -q 1 127.0.0.1 3565 < .github/data/good_edit.xml)
+          result=$(nc -q 10 127.0.0.1 3565 < .github/data/good_edit.xml)
           echo "${result}"
           echo "${result}" | grep -q '<think_vandalism>false</think_vandalism>'
 
-      - name: Package the binaries
+  package-artifacts:
+    runs-on: ubuntu-latest
+    needs: [build-container, test-container]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Extract artifacts
         run: |
           mkdir -p release/{bin,data}
-          docker_id=$(docker ps --format '{{.ID}}' -n 1 -l)
+          docker pull ghcr.io/${{ github.repository }}:${{ github.sha }}
+          cid=$(docker create ghcr.io/${{ github.repository }}:${{ github.sha }})
 
           # Binaries
           for obj in cluebotng create_ann create_bayes_db print_bayes_db;
           do
-            docker cp ${docker_id}:/opt/cbng-core/${obj} release/bin/${obj}
+            docker cp "${cid}:/workspace/${obj}" release/bin/${obj}
           done
 
           # Databases
           for obj in main_ann.fann bayes.db two_bayes.db;
           do
-            docker cp ${docker_id}:/opt/cbng-core/data/${obj} release/data/${obj}
+            docker cp "${cid}:/workspace/data/${obj}" release/data/${obj}
           done
 
+          docker rm "${cid}"
+
           # Config files
-          tar -cvzf release/conf.tar.gz conf
+          tar -czf release/conf.tar.gz conf
 
       - name: Stash the artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@v7
         with:
+          name: release-artifacts
           retention-days: 7
-          path: "release/**"
+          path: |
+            release/**

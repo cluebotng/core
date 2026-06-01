@@ -1,0 +1,20 @@
+name: Deploy Tagged Release
+on:
+  release:
+    types:
+      - released
+  workflow_call:
+    inputs:
+      ref:
+        required: false
+        type: string
+jobs:
+  update-components:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: cluebotng/ci-update-component-ref@main
+        with:
+          tool: 'cluebotng-review'
+          component: 'cluebotng-reviewer'
+          ref: '${{ inputs.ref || github.ref }}'
+          gh_app_key: '${{ secrets.CI_COMPONENT_CONFIGS_APP_KEY }}'

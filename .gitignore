@@ -5,6 +5,13 @@ create_bayes_db
 print_bayes_db
 core
 
+# CMake build artifacts
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+libs/
+
 # Editor configs
 .idea/
 *.iml
