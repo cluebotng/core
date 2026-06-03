@@ -11,7 +11,7 @@ jobs:
       packages: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Build container
         uses: infrabits/ci-pack@e6fda6bd38b30aed25d3203d7559b756d75d884c # main
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-container]
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Start container
         run: |
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-container, test-container]
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Extract artifacts
         run: |
