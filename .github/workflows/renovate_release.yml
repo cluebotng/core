@@ -1,0 +1,73 @@
+name: Create Release For Renovate
+on: { push: { branches: [ 'main' ] } }
+jobs:
+  renovate-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: infrabits/ci-create-renovate-release@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          create-release: false
+
+  build-container:
+    needs: [renovate-release]
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      packages: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build container
+        uses: infrabits/ci-pack@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          image: ghcr.io/${{ github.repository }}:${{ needs.renovate-release.outputs.tag_name }}
+          use_builder: latest
+          buildpack: https://github.com/InfraBits/cmake-buildpack/releases/download/v1.0.1/buildpack.tar.gz
+    if: needs.renovate-release.outputs.tag_name != ''
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [renovate-release, build-container]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Extract artifacts
+        run: |
+          mkdir -p release/{bin,data}
+          docker pull ghcr.io/${{ github.repository }}:${{ needs.renovate-release.outputs.tag_name }}
+          cid=$(docker create ghcr.io/${{ github.repository }}:${{ needs.renovate-release.outputs.tag_name }})
+
+          # Binaries
+          for obj in cluebotng create_ann create_bayes_db print_bayes_db;
+          do
+            docker cp "${cid}:/workspace/${obj}" release/bin/${obj}
+          done
+
+          # Databases
+          for obj in main_ann.fann bayes.db two_bayes.db;
+          do
+            docker cp "${cid}:/workspace/data/${obj}" release/data/${obj}
+          done
+
+          docker rm "${cid}"
+
+          # Config files
+          tar -czf release/conf.tar.gz conf
+
+      - name: Create GitHub release
+        uses: infrabits/ci-create-missing-release@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.renovate-release.outputs.tag_name }}
+          artifacts: |
+            release/data/**
+            release/bin/**
+            release/conf.tar.gz
+    if: needs.renovate-release.outputs.tag_name != ''
