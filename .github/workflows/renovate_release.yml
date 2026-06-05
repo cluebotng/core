@@ -6,7 +6,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: infrabits/ci-create-renovate-release@main
+      - uses: infrabits/ci-create-renovate-release@99a3ddfb889b29e15f753beac630159376f82d27 # main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           create-release: false
@@ -19,10 +19,10 @@ jobs:
       packages: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Build container
-        uses: infrabits/ci-pack@main
+        uses: infrabits/ci-pack@e6fda6bd38b30aed25d3203d7559b756d75d884c # main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           image: ghcr.io/${{ github.repository }}:${{ needs.renovate-release.outputs.tag_name }}
@@ -36,7 +36,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Extract artifacts
         run: |
@@ -62,7 +62,7 @@ jobs:
           tar -czf release/conf.tar.gz conf
 
       - name: Create GitHub release
-        uses: infrabits/ci-create-missing-release@main
+        uses: infrabits/ci-create-missing-release@9b9b256bbdf59a093f847f2d7fa18700eaadffa1 # main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.renovate-release.outputs.tag_name }}
