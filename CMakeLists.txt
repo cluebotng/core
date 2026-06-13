@@ -4,6 +4,8 @@ project(ClueBotNGCore)
 # Build options
 option(COMPILE_BAYES_DB "Create bayes.db & two_bayes.db after compiling" ON)
 option(CLEANUP_WORKSPACE "Remove all files from /workspace except the build output" ON)
+add_compile_options(-g -O2 -fno-pie)
+add_link_options(-no-pie)
 
 # External packages
 cmake_policy(SET CMP0167 NEW)
@@ -25,8 +27,6 @@ add_executable(cluebotng src/bayesdb.hpp
                          src/standardprocessors.hpp
                          src/main.cpp)
 target_include_directories(cluebotng PRIVATE ${ICONV_INCLUDES})
-target_compile_options(cluebotng PRIVATE -fno-pie)
-target_link_options(cluebotng PRIVATE -no-pie)
 target_link_libraries(cluebotng PRIVATE
     -Wl,-Bstatic
     expat
@@ -45,8 +45,6 @@ target_link_libraries(cluebotng PRIVATE
 )
 
 add_executable(create_ann src/create_ann.cpp)
-target_compile_options(create_ann PRIVATE -fno-pie)
-target_link_options(create_ann PRIVATE -no-pie)
 target_link_libraries(create_ann PRIVATE -Wl,-Bstatic fann -Wl,-Bdynamic)
 
 add_executable(create_bayes_db src/bayesdb.hpp src/create_bayes_db.cpp)
