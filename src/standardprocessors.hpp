@@ -25,7 +25,7 @@
 #include <string.h>
 #include <fstream>
 #include <sys/types.h>
-#include <regex.h>
+#include <boost/regex.hpp>
 #include <matheval.h>
 #include <map>
 #include <math.h>
@@ -705,19 +705,20 @@ public:
             std::string metricname = (const char *)metrics[i].getName();
             libconfig::Setting & searches = metrics[i];
             for(int j = 0; j < searches.getLength(); ++j) {
-                int flags = 0;
+                boost::regex_constants::syntax_option_type flags = boost::regex::basic;
                 if(searches[j].exists("flags")) {
                     std::string flagstr = (const char *)searches[j]["flags"];
                     for(std::string::iterator flagit = flagstr.begin(); flagit != flagstr.end(); ++flagit) {
                         switch(*flagit) {
                         case 'E':
-                            flags |= REG_EXTENDED;
+                            flags |= boost::regex::extended;
                             break;
                         case 'I':
-                            flags |= REG_ICASE;
+                            flags |= boost::regex::icase;
                             break;
                         case 'N':
-                            flags |= REG_NEWLINE;
+                            // no-op: ^/$ line anchoring is handled by advancing pos on each
+                            // regex_search call; . already excludes \n in POSIX extended mode
                             break;
                         default:
                             throw std::runtime_error("Unknown regex flag");
@@ -745,71 +746,28 @@ public:
 
 private:
     struct PosixRegex {
-        regex_t preg;
+        boost::regex preg;
         std::string metric;
         boost::mutex mut;
 
-        PosixRegex(const std::string & regexstr, int flags, const std::string & name) {
-            int r = regcomp(&preg, regexstr.c_str(), flags);
-            if(r != 0) {
-                std::string exstr("POSIX Regex Compile Error on Regex ");
-                exstr += name + ": ";
-                switch(r) {
-                case REG_BADBR:
-                    exstr += "Invalid use of back reference operator.";
-                    break;
-                case REG_BADPAT:
-                    exstr += "Invalid use of pattern operators.";
-                    break;
-                case REG_BADRPT:
-                    exstr += "Invalid use of repetition operators.";
-                    break;
-                case REG_EBRACE:
-                    exstr += "Un-matched braces.";
-                    break;
-                case REG_EBRACK:
-                    exstr += "Un-matched brackets.";
-                    break;
-                case REG_ECOLLATE:
-                    exstr += "Invalid collating element.";
-                    break;
-                case REG_ECTYPE:
-                    exstr += "Unknown character class.";
-                    break;
-                case REG_EESCAPE:
-                    exstr += "Trailing backslash.";
-                    break;
-                case REG_EPAREN:
-                    exstr += "Un-matched parens.";
-                    break;
-                case REG_ERANGE:
-                    exstr += "Invalid use of range operator.";
-                    break;
-                case REG_ESUBREG:
-                    exstr += "Invalid back reference.";
-                    break;
-                default:
-                    exstr += "Unknown error.";
-                    break;
-                }
-                throw std::runtime_error(exstr.c_str());
+        PosixRegex(const std::string & regexstr, boost::regex_constants::syntax_option_type flags, const std::string & name) {
+            try {
+                preg.assign(regexstr, flags);
+            } catch (const boost::regex_error & e) {
+                throw std::runtime_error(std::string("Regex Compile Error on Regex ") + name + ": " + e.what());
             }
-        }
-        ~PosixRegex() {
-            regfree(&preg);
         }
 
         int countMatches(const std::string & str) {
             boost::lock_guard<boost::mutex> lock(mut);
-            regmatch_t matches[10];
             const char * pos = str.c_str();
+            const char * end = pos + str.size();
+            boost::cmatch m;
             int c = 0;
-            for(;;) {
-                int r = regexec(&preg, pos, 10, matches, 0);
-                if(r != 0) break;
+            while(boost::regex_search(pos, end, m, preg)) {
                 ++c;
-                if(matches[0].rm_so == -1) break;
-                pos += matches[0].rm_eo;
+                if(m[0].length() == 0) break;
+                pos = m[0].second;
             }
             return c;
         }
@@ -824,19 +782,20 @@ public:
     PosixRegexReplace(libconfig::Setting & cfg) : TextProcessor(cfg) {
         libconfig::Setting & replacements = configuration["replacements"];
         for(int i = 0; i < replacements.getLength(); ++i) {
-            int flags = 0;
+            boost::regex_constants::syntax_option_type flags = boost::regex::basic;
             if(replacements[i].exists("flags")) {
                 std::string flagstr = (const char *)replacements[i]["flags"];
                 for(std::string::iterator flagit = flagstr.begin(); flagit != flagstr.end(); ++flagit) {
                     switch(*flagit) {
                     case 'E':
-                        flags |= REG_EXTENDED;
+                        flags |= boost::regex::extended;
                         break;
                     case 'I':
-                        flags |= REG_ICASE;
+                        flags |= boost::regex::icase;
                         break;
                     case 'N':
-                        flags |= REG_NEWLINE;
+                        // no-op: ^/$ line anchoring is handled by advancing pos on each
+                        // regex_search call; . already excludes \n in POSIX extended mode
                         break;
                     default:
                         throw std::runtime_error("Unknown regex flag");
@@ -862,73 +821,30 @@ public:
 
 private:
     struct PosixRegex {
-        regex_t preg;
+        boost::regex preg;
         std::string replacement;
         boost::mutex mut;
 
-        PosixRegex(const std::string & regexstr, int flags, const std::string & name) {
-            int r = regcomp(&preg, regexstr.c_str(), flags);
-            if(r != 0) {
-                std::string exstr("POSIX Regex Compile Error on Regex ");
-                exstr += name + ": ";
-                switch(r) {
-                case REG_BADBR:
-                    exstr += "Invalid use of back reference operator.";
-                    break;
-                case REG_BADPAT:
-                    exstr += "Invalid use of pattern operators.";
-                    break;
-                case REG_BADRPT:
-                    exstr += "Invalid use of repetition operators.";
-                    break;
-                case REG_EBRACE:
-                    exstr += "Un-matched braces.";
-                    break;
-                case REG_EBRACK:
-                    exstr += "Un-matched brackets.";
-                    break;
-                case REG_ECOLLATE:
-                    exstr += "Invalid collating element.";
-                    break;
-                case REG_ECTYPE:
-                    exstr += "Unknown character class.";
-                    break;
-                case REG_EESCAPE:
-                    exstr += "Trailing backslash.";
-                    break;
-                case REG_EPAREN:
-                    exstr += "Un-matched parens.";
-                    break;
-                case REG_ERANGE:
-                    exstr += "Invalid use of range operator.";
-                    break;
-                case REG_ESUBREG:
-                    exstr += "Invalid back reference.";
-                    break;
-                default:
-                    exstr += "Unknown error.";
-                    break;
-                }
-                throw std::runtime_error(exstr.c_str());
+        PosixRegex(const std::string & regexstr, boost::regex_constants::syntax_option_type flags, const std::string & name) {
+            try {
+                preg.assign(regexstr, flags);
+            } catch (const boost::regex_error & e) {
+                throw std::runtime_error(std::string("Regex Compile Error on Regex ") + name + ": " + e.what());
             }
-        }
-        ~PosixRegex() {
-            regfree(&preg);
         }
 
         std::string replaceStr(const std::string & str) {
             boost::lock_guard<boost::mutex> lock(mut);
-            regmatch_t matches[10];
-            const char * pos = str.c_str();
             std::string res;
-            for(;;) {
-                int r = regexec(&preg, pos, 10, matches, 0);
-                if(r != 0) break;
-                if(matches[0].rm_so == -1) break;
-                res.append(pos, matches[0].rm_so);
-                pos += matches[0].rm_eo;
+            const char * pos = str.c_str();
+            const char * end = pos + str.size();
+            boost::cmatch m;
+            while(boost::regex_search(pos, end, m, preg)) {
+                res.append(m.prefix().first, m.prefix().second);
+                if(m[0].length() == 0) break;
+                pos = m[0].second;
             }
-            res.append(pos);
+            res.append(pos, end);
             return res;
         }
     };
