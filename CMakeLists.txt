@@ -4,7 +4,7 @@ project(ClueBotNGCore)
 # Build options
 option(COMPILE_BAYES_DB "Create bayes.db & two_bayes.db after compiling" ON)
 option(CLEANUP_WORKSPACE "Remove all files from /workspace except the build output" ON)
-add_compile_options(-g -O2 -fno-pie)
+add_compile_options(-g -O2 -fno-pie -DBOOST_REGEX_NO_POSIX_API)
 add_link_options(-no-pie)
 
 # External packages
