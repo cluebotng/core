@@ -5,7 +5,6 @@ schema-version = "0.2"
 install = [
   { name = "build-essential", force = true },
   { name = "libboost-dev", force = true },
-  { name = "libboost-regex-dev", force = true },
   { name = "libboost-system-dev", force = true },
   { name = "libboost-thread-dev", force = true },
   { name = "libconfig++-dev", force = true },

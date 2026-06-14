@@ -11,11 +11,14 @@ add_link_options(-no-pie)
 cmake_policy(SET CMP0167 NEW)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-find_package(Boost REQUIRED COMPONENTS thread system regex)
+find_package(Boost REQUIRED COMPONENTS thread system)
 
 # We require a specific implementation of iconv (unicode support)
 set(LIBICONV_RELEASE "1.17")
 include(cmake/compile_iconv.cmake)
+
+# Setup paths properly
+include(cmake/fix_headers.cmake)
 
 # Main binaries
 add_executable(cluebotng src/bayesdb.hpp
@@ -26,7 +29,7 @@ add_executable(cluebotng src/bayesdb.hpp
                          src/neuralnet.hpp
                          src/standardprocessors.hpp
                          src/main.cpp)
-target_include_directories(cluebotng PRIVATE ${ICONV_INCLUDES})
+target_include_directories(cluebotng PRIVATE ${ICONV_INCLUDES} ${EXTRA_HEADER_INCLUDES})
 target_link_libraries(cluebotng PRIVATE
     -Wl,-Bstatic
     expat
@@ -36,7 +39,6 @@ target_link_libraries(cluebotng PRIVATE
     config++
     boost_thread
     boost_system
-    boost_regex
     m
     matheval
     fl
