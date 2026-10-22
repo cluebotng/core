@@ -11,7 +11,7 @@ add_link_options(-no-pie)
 cmake_policy(SET CMP0167 NEW)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-find_package(Boost REQUIRED COMPONENTS thread system)
+find_package(Boost REQUIRED COMPONENTS thread)
 
 # We require a specific implementation of iconv (unicode support)
 set(LIBICONV_RELEASE "1.17")
@@ -38,7 +38,6 @@ target_link_libraries(cluebotng PRIVATE
     fann
     config++
     boost_thread
-    boost_system
     m
     matheval
     fl

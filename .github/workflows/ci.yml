@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [toolforge-stable, toolforge-latest]
+        target: [toolforge-stable, toolforge-latest, upstream]
     permissions:
       security-events: write
       packages: write
@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [toolforge-stable, toolforge-latest]
+        target: [toolforge-stable, toolforge-latest, upstream]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
