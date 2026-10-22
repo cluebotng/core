@@ -6,6 +6,10 @@ concurrency:
 jobs:
   build-container:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [toolforge-stable, toolforge-latest]
     permissions:
       security-events: write
       packages: write
@@ -14,23 +18,28 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Build container
-        uses: infrabits/ci-pack@b333d34aacd3b2588fc9a1c5fbf22b76728a4cc7 # main
+        uses: infrabits/ci-pack@fc66a00bd1b423c7d52611bbf067b9dce7e20c91 # v1.4.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          image: ghcr.io/${{ github.repository }}:${{ github.sha }}
-          use_builder: latest
+          image: ghcr.io/${{ github.repository }}:${{ matrix.target }}-${{ github.sha }}
+          use_builder: ${{ matrix.target }}
+          run_safety_checks: ${{ matrix.target == 'toolforge-stable' && 'true' || 'false' }}
           buildpack: https://github.com/InfraBits/cmake-buildpack/releases/download/v1.0.1/buildpack.tar.gz
 
   test-container:
     runs-on: ubuntu-latest
     needs: [build-container]
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [toolforge-stable, toolforge-latest]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Start container
         run: |
-          docker pull ghcr.io/${{ github.repository }}:${{ github.sha }}
-          docker run -d -p 3565:3565 ghcr.io/${{ github.repository }}:${{ github.sha }}
+          docker pull ghcr.io/${{ github.repository }}:${{ matrix.target }}-${{ github.sha }}
+          docker run -d -p 3565:3565 ghcr.io/${{ github.repository }}:${{ matrix.target }}-${{ github.sha }}
           timeout 30 bash -c 'until nc -w 1 127.0.0.1 3565 2>/dev/null | grep -q "<WPEditSet>"; do sleep 1; done'
 
       - name: Verify a vandalised edit
@@ -54,8 +63,8 @@ jobs:
       - name: Extract artifacts
         run: |
           mkdir -p release/{bin,data}
-          docker pull ghcr.io/${{ github.repository }}:${{ github.sha }}
-          cid=$(docker create ghcr.io/${{ github.repository }}:${{ github.sha }})
+          docker pull ghcr.io/${{ github.repository }}:toolforge-stable-${{ github.sha }}
+          cid=$(docker create ghcr.io/${{ github.repository }}:toolforge-stable-${{ github.sha }})
 
           # Binaries
           for obj in cluebotng create_ann create_bayes_db print_bayes_db;

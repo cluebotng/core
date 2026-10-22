@@ -22,11 +22,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Build container
-        uses: infrabits/ci-pack@b333d34aacd3b2588fc9a1c5fbf22b76728a4cc7 # main
+        uses: infrabits/ci-pack@fc66a00bd1b423c7d52611bbf067b9dce7e20c91 # v1.4.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           image: ghcr.io/${{ github.repository }}:${{ needs.renovate-release.outputs.tag_name }}
-          use_builder: latest
+          use_builder: toolforge-latest
           buildpack: https://github.com/InfraBits/cmake-buildpack/releases/download/v1.0.1/buildpack.tar.gz
     if: needs.renovate-release.outputs.tag_name != ''
 
