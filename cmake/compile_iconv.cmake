@@ -31,7 +31,8 @@ endif ()
 
 if (NOT EXISTS ${CMAKE_SOURCE_DIR}/libs/libiconv-${LIBICONV_RELEASE}/lib/.libs/libiconv.a)
     execute_process(
-        COMMAND ./configure --enable-static
+        # libiconv 1.17 uses pre-C23 declarations (e.g. mbrtowc), newer compilers default to C23
+        COMMAND ${CMAKE_COMMAND} -E env "CFLAGS=-g -O2 -std=gnu17" ./configure --enable-static
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libs/libiconv-${LIBICONV_RELEASE}
         RESULT_VARIABLE ICONV_CONFIGURE_RESULT
     )

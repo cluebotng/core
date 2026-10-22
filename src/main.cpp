@@ -212,10 +212,10 @@ public:
 
     void listen(int port) {
         using boost::asio::ip::tcp;
-        boost::asio::io_service io_service;
-        tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), port));
+        boost::asio::io_context io_context;
+        tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), port));
         for(;;) {
-            boost::shared_ptr<tcp::socket> socket(new tcp::socket(io_service));
+            boost::shared_ptr<tcp::socket> socket(new tcp::socket(io_context));
             acceptor.accept(*socket);
             boost::thread thread(boost::ref(*this), socket);
         }
