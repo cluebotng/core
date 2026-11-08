@@ -12,5 +12,15 @@
       "matchManagers": ["github-actions"],
       "groupName": "CI dependencies"
     }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update cmake-buildpack release in workflows",
+      "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/"],
+      "matchStrings": ["https://github\\.com/InfraBits/cmake-buildpack/releases/download/(?<currentValue>[^/]+)/"],
+      "depNameTemplate": "InfraBits/cmake-buildpack",
+      "datasourceTemplate": "github-releases"
+    }
   ]
 }
