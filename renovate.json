@@ -22,5 +22,8 @@
       "depNameTemplate": "InfraBits/cmake-buildpack",
       "datasourceTemplate": "github-releases"
     }
-  ]
+  ],
+  "lockFileMaintenance": {
+    "enabled": true
+  }
 }
