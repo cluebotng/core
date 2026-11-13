@@ -24,7 +24,7 @@ jobs:
           image: ghcr.io/${{ github.repository }}:${{ matrix.target }}-${{ github.sha }}
           use_builder: ${{ matrix.target }}
           run_safety_checks: ${{ matrix.target == 'toolforge-stable' && 'true' || 'false' }}
-          buildpack: https://github.com/InfraBits/cmake-buildpack/releases/download/v1.0.1/buildpack.tar.gz
+          buildpack: https://github.com/InfraBits/cmake-buildpack/releases/download/v1.2.0/buildpack.tar.gz
 
   test-container:
     runs-on: ubuntu-latest
