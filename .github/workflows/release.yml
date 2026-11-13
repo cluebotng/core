@@ -19,7 +19,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           image: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
           use_builder: toolforge-latest
-          buildpack: https://github.com/InfraBits/cmake-buildpack/releases/download/v1.0.1/buildpack.tar.gz
+          buildpack: https://github.com/InfraBits/cmake-buildpack/releases/download/v1.2.0/buildpack.tar.gz
 
   create-release:
     runs-on: ubuntu-latest
